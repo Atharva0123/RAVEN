@@ -1,0 +1,135 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-raven}
+      POSTGRES_USER: ${POSTGRES_USER:-raven}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - raven-postgres:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - raven-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: minio/minio:RELEASE.2025-02-07T23-21-09Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-raven-local}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+    ports:
+      - "${RAVEN_MINIO_BIND:-127.0.0.1}:9000:9000"
+      - "${RAVEN_MINIO_BIND:-127.0.0.1}:9001:9001"
+    volumes:
+      - raven-objects:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-02-08T19-14-21Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["mc alias set raven http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD && mc mb --ignore-existing raven/raven-videos"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-raven-local}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment: &raven-env
+      RAVEN_API_KEY: ${RAVEN_API_KEY:?Set RAVEN_API_KEY in .env}
+      RAVEN_REDIS_URL: redis://redis:6379/0
+      RAVEN_RATE_LIMIT_STORAGE_URI: redis://redis:6379/1
+      RAVEN_DATABASE_URL: postgresql://${POSTGRES_USER:-raven}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-raven}
+      RAVEN_STORAGE_BACKEND: s3
+      RAVEN_S3_BUCKET: raven-videos
+      RAVEN_STORAGE_LOCAL_ROOT: /app/data/objects
+      RAVEN_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-raven-local}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      RAVEN_CORS_ORIGINS: ${RAVEN_CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+    ports:
+      - "${RAVEN_API_BIND:-127.0.0.1}:8000:8000"
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      minio-init: {condition: service_completed_successfully}
+      worker: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["celery", "-A", "src.tasks:celery_app", "worker", "--loglevel=INFO", "--pool=prefork", "--concurrency=${RAVEN_WORKER_CONCURRENCY:-1}"]
+    environment: *raven-env
+    depends_on:
+      redis: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+      minio-init: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A src.tasks:celery_app inspect ping --timeout=3 | grep -q pong"]
+      interval: 10s
+      timeout: 6s
+      retries: 10
+    # On Linux with NVIDIA Container Toolkit, uncomment to expose GPUs:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      RAVEN_API_URL: http://api:8000
+      RAVEN_API_KEY: ${RAVEN_API_KEY:?Set RAVEN_API_KEY in .env}
+      RAVEN_BROWSER_API_URL: ${RAVEN_BROWSER_API_URL:-http://localhost:8000}
+    ports:
+      - "${RAVEN_FRONTEND_BIND:-127.0.0.1}:3000:3000"
+    depends_on:
+      api: {condition: service_healthy}
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    ports:
+      - "${RAVEN_PROMETHEUS_BIND:-127.0.0.1}:9090:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - raven-prometheus:/prometheus
+
+volumes:
+  raven-redis:
+  raven-prometheus:
+  raven-postgres:
+  raven-objects:

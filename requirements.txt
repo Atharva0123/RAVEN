@@ -1,0 +1,27 @@
+ultralytics>=8.4.161
+torch>=2.1
+torchvision>=0.16
+# Text encoder used by YOLO-World prompt labels (pinned upstream implementation).
+git+https://github.com/ultralytics/CLIP.git@a13192f8cb767260d7dfd98c843b0716593169e7
+numpy
+opencv-python
+imageio-ffmpeg>=0.5.1
+Pillow>=10.0.0
+PyYAML
+fastapi
+uvicorn[standard]
+python-multipart>=0.0.9
+psycopg[binary]>=3.2
+streamlit>=1.37
+pytest
+slowapi>=0.1.9
+prometheus-fastapi-instrumentator>=7.0.0
+celery[redis]>=5.4.0
+boto3>=1.34.0
+onnx>=1.16.0
+onnxslim>=0.1.59
+# CPU inference. For NVIDIA GPUs, replace this package with onnxruntime-gpu.
+onnxruntime>=1.18.0
+# Palette-image analysis and optional thermal facial landmark inference.
+thermaPy>=0.0.2
+thermal-face-alignment>=1.0.0

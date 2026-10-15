@@ -1,0 +1,118 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual environments ───────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── LLVIP raw dataset and local-only sample imagery ────────────────────────────
+data/raw/
+data/local_assets/
+
+# ── Large model weights (not the S-DEC checkpoint) ────────────────────────────
+weights/
+
+# ── Runtime logs ──────────────────────────────────────────────────────────────
+data/logs/
+*.log
+
+# ── Node / frontend ───────────────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+
+# ── Secrets / Environment ──────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+frontend/.env.local
+*.env
+
+# ── Runtime state / job files ─────────────────────────────────────────────────
+data/local_jobs.json
+data/raven-jobs-*.json
+
+# ── OS / IDE ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ── Jupyter checkpoints ────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Pytest cache ───────────────────────────────────────────────────────────────
+.pytest_cache/
+
+# ── Temporary outputs ──────────────────────────────────────────────────────────
+tmp/
+*.tmp
+
+# ── Ultralytics cache ─────────────────────────────────────────────────────────
+Ultralytics/
+
+# ── Demo MP4s tracked via Git LFS (declare in .gitattributes) ────────────────
+# demo_videos/ and data/demo/ MP4s are tracked by LFS, not ignored
+
+# Public repository hygiene: never publish credentials, local data, datasets, caches or model weights.
+.env
+.env.*
+!.env.example
+*.pt
+*.pth
+*.onnx
+*.mp4
+*.avi
+*.mov
+/*.png
+weights/
+data/raw/
+data/fusion_rebuild/
+data/action_anomaly/
+data/demo/
+data/logs/
+data/objects/
+data/recorded_clips/
+data/paper_experiment/
+data/local_jobs.json
+data/raven-jobs-*.json
+data/alerts.jsonl
+data/attached-video-contact.png
+data/models/*
+!data/models/confidence_fusion.pt
+output/pdf/
+output/**/*.zip
+output/**/*.pt
+output/**/multi_seed_checkpoints/
+RAVEN_revised_from_colab.docx
+docs/*.docx
+frontend/.next_stale_backup/
+
+# Keep manuscript drafts separate until synchronized with the current notebook.
+docs/manuscripts/
+
+# Historical source is retained locally but excluded from the maintained GitHub project.
+archived/
+output/pdf/
+output/**/*.png
+
+# Next.js generated output from a local dev server.
+frontend/.next/
+
+# Colab and local outputs are regenerated and are not source files.
+output/RAVEN_LLVIP_2026-10-15/raven_results.zip
+output/RAVEN_LLVIP_2026-10-15/**/confidence_*.pt
+output/RAVEN_LLVIP_2026-10-15/**/full_8_features_seed_*.pt
+demo_videos/
+# Downloadable curated source bundle, not part of the repository.
+github_upload/

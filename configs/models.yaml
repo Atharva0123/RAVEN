@@ -1,0 +1,95 @@
+# RAVEN — Research Prototype: Multi-Modal Quality-Aware Sensor Fusion & Temporal Event Ranking
+# Exploratory architectural prototype and feasibility study; not a deployment-validated threat detector.
+# confidence_fusion.pt is reserved for the paper's two-confidence-input calibrator.
+# best_model.pth is synthetic-only architecture/data-flow smoke-test weights and is disabled for scoring.
+# RGB-derived pseudo-thermal is for visualization only and is never independent fusion evidence.
+detection:
+  rgb_model: "yolo26l.pt"
+  thermal_model: "yolov8n.pt"
+  conf_threshold: 0.25
+  iou_threshold: 0.45
+  image_size: 640
+  association_iou: 0.05
+  max_center_distance: 1.5
+
+# Proposal cleanup before tracks can receive a person ID. Thermal thresholds
+# are lower because false-color infrared contrast differs from visible RGB.
+person_filter:
+  min_confidence: 0.25
+  thermal_min_confidence: 0.38
+  min_height_px: 20
+  min_height_fraction: 0.025
+  min_width_height_ratio: 0.12
+  max_width_height_ratio: 1.45
+  max_frame_area_fraction: 0.55
+  min_confirmed_hits: 2
+
+pose:
+  model: "yolo26l-pose.pt"
+  conf_threshold: 0.3
+
+tracking:
+  tracker_type: "botsort"
+  tracker_yaml: "configs/botsort_raven.yaml"
+  track_buffer: 90
+  match_threshold: 0.8
+
+reid:
+  enabled: true
+  similarity_threshold: 0.78
+  buffer_timeout_seconds: 30.0
+
+alerts:
+  warning: 50
+  alert: 70
+  cooldown_seconds: 5
+  trigger_actions:
+    - notify_operator
+    - log_event
+
+threat_detection:
+  confidence: 0.25
+  interval: 2
+  labels:
+    - knife
+    - scissors
+    - gun
+    - weapon
+    - firearm
+    - handgun
+    - pistol
+    - revolver
+    - rifle
+    - shotgun
+    - explosive
+    - machete
+    - sword
+    - baseball bat
+    - crowbar
+  # Pretrained open-vocabulary weights; no project training is required.
+  # The checkpoint is downloaded by Ultralytics on first analysis if uncached.
+  model_path: data/models/yolov8s-worldv2.pt
+
+identity_multipliers:
+  authorized: 0.5
+  unknown: 1.0
+  flagged: 1.5
+
+processing:
+  temporal_window: 32
+  temporal_stride: 1
+  track_stale_seconds: 5.0
+  ui_refresh_fps: 10
+  modes:
+    Accuracy:
+      detection_interval: 1
+      pose_interval: 1
+    Balanced:
+      detection_interval: 1
+      pose_interval: 2
+      max_pose_tracks_per_frame: 8
+    Performance:
+      detection_interval: 2
+      pose_interval: 3
+      threat_interval: 2
+      max_pose_tracks_per_frame: 4

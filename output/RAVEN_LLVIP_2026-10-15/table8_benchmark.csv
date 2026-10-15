@@ -1,0 +1,5 @@
+method,mAP50,miss_rate,FPPI
+RGB-only (YOLOv8n),0.6300,0.3556,0.2143
+Thermal-only (YOLOv8n),0.5687,0.4238,0.1623
+Late Average Fusion,0.6961,0.2844,0.3220
+RAVEN S-DEC (proposed),0.7056,0.2790,0.3090
