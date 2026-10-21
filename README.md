@@ -1,75 +1,156 @@
 # RAVEN
 
-RAVEN is a research prototype for arbitration between visible-light and thermal pedestrian detections. The project has two separate run paths: a local application demo and an LLVIP research workflow. The research workflow is the editable [RAVEN.ipynb](RAVEN.ipynb). See the [reproducibility guide](docs/REPRODUCIBILITY.md) for dataset handling, metric definition, run metadata, artifact gaps, and pre-submission checks, and the [architecture diagram](docs/figures/raven_architecture.md) for the implemented research path. The current manuscript working copy is stored locally under `docs/manuscripts/` and is excluded from GitHub until its audit items are resolved; see the [paper audit checklist](docs/PAPER_AUDIT.md). The project uses LLVIP only; it does not establish safety validation, calibrated risk probabilities, or performance on another dataset.
+**Risk-based arbitration for paired RGB–thermal pedestrian detection.**
 
-## Run the local application
+RAVEN is a research prototype that studies whether a lightweight post-detection risk head can help select among detections from visible-light and thermal sensors. The research workflow uses paired images from the **LLVIP dataset** and frozen YOLOv8n detectors for the two modalities.
 
-The full local web demo runs a FastAPI service and the Next.js interface. It uses local disk storage by default; PostgreSQL, Redis and MinIO are optional for a larger deployment.
+> **Research status:** exploratory prototype; LLVIP only. The saved archive does not yet fully reproduce all results described in the project summary. RAVEN is not safety-validated, its risk scores are not calibrated probabilities, and generalization to other datasets or real-world sensor failures has not been established.
 
-Requirements: Python, Node.js with npm, and (for optional services) Docker Desktop.
+## At a glance
+
+- **Task:** pedestrian detection using paired visible-light RGB and thermal imagery.
+- **Research workflow:** frozen per-modality detectors → candidate association → lightweight risk head → selection policy → evaluation.
+- **Dataset:** LLVIP official train/test split; 3,463 test pairs are reported by the notebook.
+- **Research notebook:** [`RAVEN.ipynb`](RAVEN.ipynb)
+- **Reproducibility instructions:** [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md)
+- **Architecture:** [`docs/figures/raven_architecture.md`](docs/figures/raven_architecture.md)
+- **Paper audit checklist:** [`docs/PAPER_AUDIT.md`](docs/PAPER_AUDIT.md)
+
+## How the research method works
+
+1. **Detect independently.** Run frozen YOLOv8n detectors on RGB and thermal images.
+2. **Associate candidates.** Match detections across modalities and construct candidate/action features.
+3. **Estimate action risk.** Train a lightweight head using annotation-derived targets; the detector backbones are not jointly trained by this head.
+4. **Select outputs.** Evaluate arbitration choices such as joint, RGB-only, and thermal-only selection, with optional abstention.
+5. **Evaluate on LLVIP.** Compare against baselines using the notebook's custom all-point AP@50 evaluator and its matching rule, alongside error and coverage measures.
+
+This is a post-detection arbitration study, not a new object detector. See the architecture and reproducibility documents for implementation details and metric caveats.
+
+## Research results and evidence status
+
+The current project summary reports the following clean-test results:
+
+| Method | Reported AP@50 / mAP@50 |
+|---|---:|
+| Late-average fusion | 0.6961 |
+| RAVEN full model | 0.7083 ± 0.0029 |
+| Confidence-plus-match ablation | 0.7088 ± 0.0019 |
+| Weighted-box fusion (WBF) | 0.7210 |
+
+**These figures are not yet fully traceable to the checked-in output archive.** The committed `output/RAVEN_LLVIP_2026-10-15/run_summary.json` is an older seed-42 run that records RAVEN AP50 0.7056, and its `table8_benchmark.csv` does not include the confidence-plus-match or WBF rows. The three-seed figures and WBF comparison should therefore be treated as reported project results, not independently verified archived results, until the matching notebook run and complete exports are saved.
+
+Interpretation should remain conservative:
+
+- WBF has the highest reported clean-test score in the project summary.
+- The confidence-plus-match ablation is marginally above the full model, so the results do not establish that the learned geometry/risk features improve the score.
+- The reported paired image-bootstrap interval for RAVEN versus late-average fusion is +0.0065 to +0.0187; image-level resampling does not account for scene clustering or all training uncertainty.
+- Sensor-degradation tests use synthetic perturbations. They are not evidence of robustness to physical sensor failure, weather, glare, or deployment conditions.
+- Coverage remained near 100% in the reported experiments, so meaningful selective risk reduction via abstention has not been demonstrated.
+
+Do not compare these values as standard VOC mAP unless the evaluator is changed and all methods are recomputed consistently. The notebook uses a custom all-point AP@50 implementation with a specific one-to-one matching rule; see the [reproducibility guide](docs/REPRODUCIBILITY.md).
+
+## Run the research notebook
+
+The dataset is not included in this repository. Obtain LLVIP from its official source and follow the dataset terms.
+
+1. Open [`RAVEN.ipynb`](RAVEN.ipynb) in Google Colab.
+2. Select a GPU runtime if available.
+3. Mount Google Drive when prompted and provide the LLVIP ZIP or extracted dataset directory.
+4. Run the notebook cells from top to bottom; do not skip detection, candidate construction, training, evaluation, or export stages.
+5. Check the dataset split and image-stem overlap checks, then save the notebook and all generated artifacts from the same run.
+
+The notebook writes outputs under `/content/raven_results/`. Copy only outputs produced by the run being documented into a versioned repository output folder. Archive the configuration and runtime versions alongside each table.
+
+Before using results in a paper, read [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) and [`docs/PAPER_AUDIT.md`](docs/PAPER_AUDIT.md). In particular, export the complete benchmark table, per-seed results, degradation summaries and bootstrap outputs from the exact run. Only include `pairing_summary.json` if the corresponding detector pairing was actually evaluated.
+
+## Run the local application demo
+
+The local demo is a separate software path from the LLVIP research notebook. Its outputs are **not** benchmark results and should not be used as evidence for the research tables.
+
+### Requirements
+
+- Python
+- Node.js and npm
+- Optional: Docker Desktop for the Compose setup
+
+### Windows PowerShell
+
+From the repository root:
 
 ```powershell
-# From the project folder
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+
 Push-Location frontend
 npm ci
 Pop-Location
+
 python scripts/run_demo.py
 ```
 
-Open the local URL printed by the launcher. Press `Ctrl+C` to stop it. The launcher creates a temporary local API key if `RAVEN_API_KEY` is not already configured. For the older Streamlit dashboard, run `python scripts/run_demo.py --legacy-streamlit` instead.
+Open the local URL printed by the launcher. Press `Ctrl+C` to stop it. The launcher creates a temporary local API key if `RAVEN_API_KEY` is not configured. To run the legacy Streamlit dashboard instead:
 
-For the Docker Compose deployment, copy `.env.example` to `.env`, replace every example password/key with private values, then run:
+```powershell
+python scripts/run_demo.py --legacy-streamlit
+```
+
+### Docker Compose
+
+Copy `.env.example` to `.env`, replace all example secrets with private values, and run:
 
 ```powershell
 docker compose up --build
 ```
 
-Never commit `.env`. The checked-in `.env.example` is only a template. The model weights are downloaded by Ultralytics when needed; they are intentionally excluded from GitHub. The app-side S-DEC checkpoint at `data/models/confidence_fusion.pt` is included as a small project artifact, but its presence does not mean it was validated by the paper benchmark.
+Never commit `.env` or real credentials. PostgreSQL, Redis, and MinIO are optional for a larger deployment; the local application uses disk storage by default. Model weights may be downloaded by Ultralytics when required and are intentionally excluded from GitHub. The small app-side checkpoint at `data/models/confidence_fusion.pt` is an application artifact and is not proof of benchmark validation.
 
-## Run the LLVIP research workflow
+## Research scope and limitations
 
-Open [RAVEN.ipynb](RAVEN.ipynb) in Google Colab and run the cells from top to bottom. Select a GPU runtime for practical run time, mount Google Drive, and provide the LLVIP ZIP or extracted folder when prompted. The notebook uses the official train/test split, checks image-stem overlap, and writes the run archive and tables under `/content/raven_results/`.
+- **One dataset:** the current evaluation is LLVIP only. No KAIST or other independent-dataset result is established.
+- **Frozen detectors:** the research workflow uses separate frozen RGB and thermal YOLOv8n detectors.
+- **Custom metric:** AP@50 is calculated using the notebook's implementation and matching rule; it should not be presented as a standard evaluator result without qualification.
+- **Synthetic degradation:** perturbations do not replicate the full range of real sensor failures or environmental conditions.
+- **Risk and abstention:** risk outputs are not established as calibrated probabilities, and the reported coverage does not show useful abstention.
+- **Baseline comparison:** WBF's reported clean score exceeds RAVEN's, and the confidence-plus-match ablation is marginally higher than the full model.
+- **Archive completeness:** some outputs described in the project summary are missing or inconsistent with the currently checked-in run files. Resolve these discrepancies before final paper submission.
 
-The saved benchmark uses frozen YOLOv8n detectors for both visible and thermal inputs and evaluates all 3,463 official LLVIP test pairs. The notebook supports optional detector pairings, but only the `v8n_v8n` pairing has saved results in this version. Do not report results for another pairing until its complete workflow has been run and its `pairing_summary.json` is saved.
-
-### Measured LLVIP results in the notebook
-
-The current notebook/manuscript-facing summary reports full-feature RAVEN mean mAP@50 0.7083 ± 0.0029 across three risk-head seeds, compared with 0.6961 for late-average fusion. **Archive mismatch:** the checked-in `run_summary.json` in the dated output folder is an older seed-42 run and reports RAVEN AP50 0.7056; the accompanying `table8_benchmark.csv` omits confidence-plus-match and WBF. Thus the three-seed and WBF comparisons are not fully traceable to the currently archived output files and must be re-exported from the exact notebook run before paper submission. The paired image-bootstrap 95% interval was +0.0065 to +0.0187. The confidence-plus-match ablation was slightly higher at 0.7088 ± 0.0019, so the experiment does not establish that geometry improves results.
-
-In the clean test, weighted-box fusion (WBF) scored 0.7210 mAP@50, above RAVEN. Across the tested simulated one-sensor degradation conditions, RAVEN exceeded late-average fusion but remained below WBF. Coverage stayed near 100%, so useful abstention was not demonstrated. Image-level bootstrap intervals do not account for scene clustering or all training uncertainty. Include false positives, misses, coverage and ablations with mAP; do not describe the risk estimates as calibrated probabilities or the system as safety-validated.
-
-The dated folder [output/RAVEN_LLVIP_2026-10-15/](output/RAVEN_LLVIP_2026-10-15/) contains an older clean-run summary and an incomplete benchmark table. Re-run Colab and export the exact matching per-seed benchmark, degradation tables, bootstrap output, and pairing summary (only if that pairing was evaluated) before treating the manuscript-facing results as fully reproducible. Review [docs/PAPER_AUDIT.md](docs/PAPER_AUDIT.md) before using the manuscript results. The LLVIP images and annotations are not included; obtain them from the official dataset source and follow its terms.
-
-## Contributions and limitations
-
-RAVEN is a scoped research prototype, not a new detector architecture or a safety-validated system. Its research contribution is a specific annotation-derived, post-detection action-risk formulation and a controlled comparison of arbitration policies over frozen RGB and thermal detectors. The saved clean benchmark does **not** show that the learned head is best: WBF scores 0.7210, above RAVEN at 0.7083 ± 0.0029, and the confidence-plus-match ablation at 0.7088 ± 0.0019 is marginally above the full model. The study uses LLVIP only; independent-dataset generalization is untested. Sensor degradation experiments are synthetic. Risk scores are not calibrated probabilities, near-100% coverage does not demonstrate useful abstention, and the system has not been validated for real-world safety or deployment.
-
-The checked-in clean results are reported notebook outputs; the repository audit identifies missing degradation exports and incomplete baseline rows in one benchmark CSV. Follow [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) and [docs/PAPER_AUDIT.md](docs/PAPER_AUDIT.md) before relying on the results or submitting the manuscript. Do not interpret application/dashboard outputs as benchmark measurements.
-
-## Project layout
+## Repository structure
 
 ```text
-RAVEN_PROJECT_BACKUP/
-├── RAVEN.ipynb                 # Current LLVIP research notebook
-├── app.py                      # Streamlit compatibility entry point
-├── configs/                    # Local application configuration
-├── dashboard/                  # Streamlit interface
-├── frontend/                   # Next.js interface
-├── src/                         # FastAPI and application modules
-├── scripts/                    # Launch, setup and evaluation utilities
-├── docs/                        # Protocol, reproducibility guide, architecture, paper audit
-├── data/models/                 # Small local S-DEC checkpoint; other weights are ignored
-├── data/local_assets/           # Local-only sample frames; not needed by the app
-└── output/RAVEN_LLVIP_2026-10-15/ # Clean-run CSVs and summary
+RAVEN/
+├── RAVEN.ipynb                  # LLVIP research notebook
+├── app.py                       # Streamlit compatibility entry point
+├── configs/                     # Local application configuration
+├── dashboard/                   # Streamlit interface
+├── frontend/                    # Next.js interface
+├── src/                          # API and application modules
+├── scripts/                     # Launch and evaluation utilities
+├── docs/
+│   ├── REPRODUCIBILITY.md       # Dataset, environment, outputs and audit guidance
+│   ├── PAPER_AUDIT.md           # Manuscript evidence checklist
+│   └── figures/
+│       └── raven_architecture.md
+├── data/models/                 # Small local application checkpoint
+└── output/RAVEN_LLVIP_2026-10-15/
+    └── run_summary.json         # Older seed-42 run; see archive caveat above
 ```
-
-The research notebook uses YOLOv8n on both streams for its saved benchmark. The local application defaults in `configs/models.yaml` use YOLO26-L for RGB detection and pose, and YOLOv8n for thermal detection. These are separate configurations and results.
 
 ## Contributors
 
-Based on the supplied project-epic allocation; contributors should verify before submission: Aaradhya More — project management ,literature review,research work and Novelty analysis; Atharva Khobrekar — LLVIP preparation and core implementation; Zain Shaikh — evaluation and experiments; Pranjal Nirmal — paper structure, documentation and presentation; Keerthana T — faculty guidance.
+Contributor roles are based on the current project allocation and should be confirmed by the team before publication:
 
+- **Aaradhya More** — project management, literature review, research work, and novelty analysis
+- **Atharva Khobrekar** — LLVIP preparation and core implementation
+- **Zain Shaikh** — evaluation and experiments
+- **Pranjal Nirmal** — paper structure, documentation, and presentation
+- **Keerthana T** — faculty guidance
+
+## Citation
+
+Software citation metadata is provided in [`CITATION.cff`](CITATION.cff). Please cite the version or commit actually used and verify author names and roles before publication.
+
+## License
+
+No repository license has been selected yet. Unless and until a license is added, do not assume that code reuse, redistribution, or modification is permitted.
