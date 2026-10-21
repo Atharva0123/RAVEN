@@ -65,5 +65,5 @@ The research notebook uses YOLOv8n on both streams for its saved benchmark. The 
 
 ## Contributors
 
-Based on the supplied project-epic allocation; contributors should verify before submission: Aaradhya More — project management and literature review; Atharva Khobrekar — LLVIP preparation and core implementation; Zain Shaikh — evaluation and experiments; Pranjal Nirmal — paper structure, documentation and presentation; Keerthana T — faculty guidance.
+Based on the supplied project-epic allocation; contributors should verify before submission: Aaradhya More — project management ,literature review,research work and Novelty analysis; Atharva Khobrekar — LLVIP preparation and core implementation; Zain Shaikh — evaluation and experiments; Pranjal Nirmal — paper structure, documentation and presentation; Keerthana T — faculty guidance.
 
