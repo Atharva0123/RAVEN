@@ -44,7 +44,7 @@ The notebook writes its result archive under `/content/raven_results/` in Colab.
 
 ## Existing clean benchmark
 
-The current README/manuscript-facing summary reports the following three-seed results. However, the checked-in `output/RAVEN_LLVIP_2026-10-15/run_summary.json` is an older single-seed run: it records seed 42, RAVEN AP50 0.7056, late-average AP50 0.6961, and does not include the reported three-seed risk-head summary or WBF/confidence-plus-match rows. The checked-in `table8_benchmark.csv` likewise contains only RGB-only, thermal-only, late-average and a single RAVEN row. Therefore the numbers below are **reported in the current project summary but are not fully traceable to the currently archived output folder**. Do not present them as independently verified from the archived CSV/JSON until the matching notebook run and full artifacts are exported.
+The compact archive at [`output/RAVEN_LLVIP_2026-10-15_v8n_v8n/`](../output/RAVEN_LLVIP_2026-10-15_v8n_v8n/) contains the `v8n_v8n` run summary, pairing metadata, clean benchmark, aggregate and per-run degradation tables, and paired bootstrap intervals. Its aggregate table contains the clean WBF and three-seed RAVEN rows. The older `output/RAVEN_LLVIP_2026-10-15/` directory is a separate seed-42 run (RAVEN AP50 0.7056); keep the folders distinct. The compact archive excludes weights, checkpoints, per-image records/error analysis, and training logs, so it supports inspection of reported tables but is not a complete rerun package.
 
 | Method | Reported custom AP@50 / mAP@50 |
 |---|---:|
@@ -53,28 +53,27 @@ The current README/manuscript-facing summary reports the following three-seed re
 | Confidence-plus-match ablation | 0.7088 ± 0.0019 |
 | Weighted-box fusion (WBF) | 0.7210 |
 
-The standard deviation for the RAVEN and confidence-plus-match rows is reported across three risk-head seeds, but the matching per-seed exports were not found in the checked-in clean-run folder. The audit records a paired image-bootstrap 95% interval of +0.0065 to +0.0187 for the RAVEN versus late-average comparison. This is an image-level interval, not a scene/clip-clustered interval, and it does not account for all training uncertainty.
+The standard deviations for the RAVEN and confidence-plus-match rows are across three risk-head seeds; see `degradation_per_run.csv` for the seed-level records. The archived `degradation_bootstrap.csv` gives a clean paired image-bootstrap 95% interval of +0.0065 to +0.0183 for RAVEN versus late-average fusion. This is an image-level interval, not a scene/clip-clustered interval, and it does not account for all training uncertainty.
 
 Interpret these results conservatively: WBF is higher on the clean benchmark; confidence-plus-match is slightly higher than the full model; these results do not establish that the learned head improves over a simple confidence rule. WBF also fuses and can move boxes, while arbitration methods select from a shared candidate/action set, so this is not a perfectly like-for-like operation.
 
 ## Required output archive
 
-Archive the exact files emitted by a completed run. The repository audit noted that the current clean-run folder does not contain all outputs described by the paper/notebook. In particular, do not claim the following files are archived until they are present and inspected:
+For the archived `v8n_v8n` run, the compact output folder contains the following selected files:
 
-- `run_summary.json`
-- `table8_benchmark.csv` with all methods discussed in the paper
-- Clean benchmark CSVs for each reported method/seed
-- `degradation_summary.csv`
-- `degradation_per_run.csv`
-- `degradation_bootstrap.csv`
-- `pairing_summary.json`, only for detector pairings actually evaluated
-- A run configuration containing seed list, checkpoint IDs, thresholds, split, metric/matching rule, bootstrap settings, package versions, and timestamp
+- `README.md` describing the run and the limits of the compact selection
+- `run_summary.json` with configuration, versions, hashes, benchmark metrics, and evaluation metadata
+- `pairing_summary.json` for the evaluated `v8n_v8n` detector pairing
+- `table8_benchmark.csv` for the compact clean benchmark table
+- `degradation_summary.csv` and `degradation_per_run.csv` for aggregate and seed-level condition results
+- `degradation_bootstrap.csv` for paired image-bootstrap intervals
+- `degradation_map50.png` for the degradation plot
 
-The audit found no checked-in `degradation_summary.csv`, `degradation_per_run.csv`, `degradation_bootstrap.csv`, or `pairing_summary.json`; it also found that `table8_benchmark.csv` omits max-confidence and WBF references discussed in the paper. Regenerate and verify these artifacts before treating them as available. Do not create placeholder CSVs or synthetic summaries to make the archive appear complete.
+The compact benchmark CSV has four rows; the aggregate degradation table additionally contains max-confidence, WBF, and the RAVEN ablations. Do not treat the older seed-42 folder as part of this run. Checkpoint files, serialized per-image records, image-level error analysis, and training logs were left out of the compact archive; the notebook and source code remain necessary for a fresh rerun. Do not create placeholder or synthetic outputs.
 
 ## Bootstrap and degradation experiments
 
-Use the notebook's implemented bootstrap procedure and record the seed and resampling unit in the exported configuration. Resolve the documented discrepancy between the paper's Table 12 interval and the notebook's saved/displayed degradation-bootstrap bounds by exporting the exact bootstrap table from the same run or revising the manuscript to match it.
+Use the notebook's implemented bootstrap procedure and record the seed and resampling unit in the exported configuration. The archived clean comparison is +0.0065 to +0.0183 in `degradation_bootstrap.csv`; align the abstract and conclusion with this exported interval before submission. The image bootstrap does not account for scene/clip clustering or all training uncertainty.
 
 The one-sensor degradations are synthetic perturbations, not physical sensor-failure trials. Report each perturbation and its parameters. They do not establish robustness to real darkness, glare, weather, hardware failure, or deployment conditions. If abstention coverage remains near 100%, do not claim meaningful selective risk reduction.
 
