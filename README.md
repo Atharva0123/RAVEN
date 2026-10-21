@@ -1,6 +1,6 @@
 # RAVEN
 
-RAVEN is a research prototype for arbitration between visible-light and thermal pedestrian detections. The project has two separate run paths: a local application demo and an LLVIP research workflow. The research workflow is the editable [RAVEN.ipynb](RAVEN.ipynb). The current manuscript working copy is stored locally under `docs/manuscripts/` and is excluded from GitHub until its audit items are resolved; see the [paper audit checklist](docs/PAPER_AUDIT.md). The project uses LLVIP only; it does not establish safety validation, calibrated risk probabilities, or performance on another dataset.
+RAVEN is a research prototype for arbitration between visible-light and thermal pedestrian detections. The project has two separate run paths: a local application demo and an LLVIP research workflow. The research workflow is the editable [RAVEN.ipynb](RAVEN.ipynb). See the [reproducibility guide](docs/REPRODUCIBILITY.md) for dataset handling, metric definition, run metadata, artifact gaps, and pre-submission checks, and the [architecture diagram](docs/figures/raven_architecture.md) for the implemented research path. The current manuscript working copy is stored locally under `docs/manuscripts/` and is excluded from GitHub until its audit items are resolved; see the [paper audit checklist](docs/PAPER_AUDIT.md). The project uses LLVIP only; it does not establish safety validation, calibrated risk probabilities, or performance on another dataset.
 
 ## Run the local application
 
@@ -44,6 +44,12 @@ In the clean test, weighted-box fusion (WBF) scored 0.7210 mAP@50, above RAVEN. 
 
 The clean-run CSVs and run summary are in [output/RAVEN_LLVIP_2026-10-15/](output/RAVEN_LLVIP_2026-10-15/). Re-run Colab and download the generated degradation tables and pairing summary to archive those results with the clean-run artifacts. Review [docs/PAPER_AUDIT.md](docs/PAPER_AUDIT.md) before using the manuscript results. The LLVIP images and annotations are not included; obtain them from the official dataset source and follow its terms.
 
+## Contributions and limitations
+
+RAVEN is a scoped research prototype, not a new detector architecture or a safety-validated system. Its research contribution is a specific annotation-derived, post-detection action-risk formulation and a controlled comparison of arbitration policies over frozen RGB and thermal detectors. The saved clean benchmark does **not** show that the learned head is best: WBF scores 0.7210, above RAVEN at 0.7083 ± 0.0029, and the confidence-plus-match ablation at 0.7088 ± 0.0019 is marginally above the full model. The study uses LLVIP only; independent-dataset generalization is untested. Sensor degradation experiments are synthetic. Risk scores are not calibrated probabilities, near-100% coverage does not demonstrate useful abstention, and the system has not been validated for real-world safety or deployment.
+
+The checked-in clean results are reported notebook outputs; the repository audit identifies missing degradation exports and incomplete baseline rows in one benchmark CSV. Follow [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) and [docs/PAPER_AUDIT.md](docs/PAPER_AUDIT.md) before relying on the results or submitting the manuscript. Do not interpret application/dashboard outputs as benchmark measurements.
+
 ## Project layout
 
 ```text
@@ -55,7 +61,7 @@ RAVEN_PROJECT_BACKUP/
 ├── frontend/                   # Next.js interface
 ├── src/                         # FastAPI and application modules
 ├── scripts/                    # Launch, setup and evaluation utilities
-├── docs/                        # Protocol, system documentation and local manuscript drafts
+├── docs/                        # Protocol, reproducibility guide, architecture, paper audit
 ├── data/models/                 # Small local S-DEC checkpoint; other weights are ignored
 ├── data/local_assets/           # Local-only sample frames; not needed by the app
 └── output/RAVEN_LLVIP_2026-10-15/ # Clean-run CSVs and summary
