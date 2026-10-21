@@ -12,6 +12,8 @@ This folder contains the compact result and provenance files selected from the `
 - `degradation_bootstrap.csv`: paired image-bootstrap comparisons and intervals.
 - `degradation_map50.png`: plot of degradation AP@50 results.
 
+`table8_benchmark.csv` is the compact four-method clean table for the seed-42 benchmark; its RAVEN S-DEC row is 0.7056 AP@50. It does not include WBF or ablation rows. Use `degradation_summary.csv` for the clean policy comparison, WBF and ablations; RAVEN variants there report means and standard deviations over three head seeds, while simple baselines are single-run. `degradation_per_run.csv` contains the underlying run records.
+
 The archive also contained model checkpoints, serialized per-image records, image-level error analysis, and training logs. Those are not included here because the checked-in notebook and code are the source for rerunning the experiment, while these large or secondary artifacts are not needed to inspect the reported tables. The LLVIP data and detector weights are not included.
 
 The notebook describes the score as **custom all-point AP@50**. Degradation results are from deterministic simulated perturbations; image-level bootstrap intervals do not account for scene/clip clustering or training uncertainty. See the repository reproducibility guide and paper audit for limitations.
