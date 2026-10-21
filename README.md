@@ -153,4 +153,6 @@ Software citation metadata is provided in [`CITATION.cff`](CITATION.cff). Please
 
 ## License
 
-No repository license has been selected yet. Unless and until a license is added, do not assume that code reuse, redistribution, or modification is permitted.
+The RAVEN source code and documentation authored for this repository are released under the [MIT License](LICENSE). It permits use, modification, and redistribution provided the copyright and license notice are retained. It is a permissive license and does not require derivative projects to publish their source code. See the full license text for the terms.
+
+The MIT license applies only to material the project has the right to license. It does **not** automatically cover the LLVIP dataset, third-party packages, pretrained model weights, or other assets with separate terms; obtain and follow their respective licenses. Before redistributing contributions from other authors, the maintainers should ensure they have permission or the necessary rights to license those contributions.
