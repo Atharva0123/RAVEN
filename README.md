@@ -156,3 +156,10 @@ Software citation metadata is provided in [`CITATION.cff`](CITATION.cff). Please
 The RAVEN source code and documentation authored for this repository are released under the [MIT License](LICENSE). It permits use, modification, and redistribution provided the copyright and license notice are retained. It is a permissive license and does not require derivative projects to publish their source code. See the full license text for the terms.
 
 The MIT license applies only to material the project has the right to license. It does **not** automatically cover the LLVIP dataset, third-party packages, pretrained model weights, or other assets with separate terms; obtain and follow their respective licenses. Before redistributing contributions from other authors, the maintainers should ensure they have permission or the necessary rights to license those contributions.
+
+
+## Clean LLVIP results figure
+
+![Historical clean LLVIP comparison using custom all-point AP@50](docs/figures/llvip_clean_ap50.svg)
+
+The plot shows the historical project-summary values above. The WBF value (0.7210) is reported in the README but its supporting row/output is absent from the checked-in result archive. Treat the plotted values as reported results, not independently verified archived results; see [the reproducibility guide](docs/REPRODUCIBILITY.md).
