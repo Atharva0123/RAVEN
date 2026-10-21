@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the repository and identify the version or commit used."
+title: "RAVEN: Lightweight Post-Detection Risk-Based Arbitration for Frozen RGB–Thermal Pedestrian Detectors"
+type: software
+authors:
+  - family-names: More
+    given-names: Aaradhya
+  - family-names: Khobrekar
+    given-names: Atharva
+  - family-names: Shaikh
+    given-names: Zain
+  - family-names: Nirmal
+    given-names: Pranjal
+  - family-names: T
+    given-names: Keerthana
+repository-code: "https://github.com/Atharva0123/RAVEN"
+abstract: "Research prototype evaluating lightweight post-detection arbitration between frozen RGB and thermal pedestrian detectors on LLVIP."
+keywords:
+  - computer vision
+  - thermal imaging
+  - multispectral fusion
+  - pedestrian detection
+  - object detection
+  - LLVIP
