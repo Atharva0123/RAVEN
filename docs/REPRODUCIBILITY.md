@@ -44,7 +44,7 @@ The notebook writes its result archive under `/content/raven_results/` in Colab.
 
 ## Existing clean benchmark
 
-The checked-in README and audit report the following saved results. These numbers are transcribed as existing reported results, not independently rerun in this documentation change.
+The current README/manuscript-facing summary reports the following three-seed results. However, the checked-in `output/RAVEN_LLVIP_2026-10-15/run_summary.json` is an older single-seed run: it records seed 42, RAVEN AP50 0.7056, late-average AP50 0.6961, and does not include the reported three-seed risk-head summary or WBF/confidence-plus-match rows. The checked-in `table8_benchmark.csv` likewise contains only RGB-only, thermal-only, late-average and a single RAVEN row. Therefore the numbers below are **reported in the current project summary but are not fully traceable to the currently archived output folder**. Do not present them as independently verified from the archived CSV/JSON until the matching notebook run and full artifacts are exported.
 
 | Method | Reported custom AP@50 / mAP@50 |
 |---|---:|
@@ -53,7 +53,7 @@ The checked-in README and audit report the following saved results. These number
 | Confidence-plus-match ablation | 0.7088 ± 0.0019 |
 | Weighted-box fusion (WBF) | 0.7210 |
 
-The standard deviation for the RAVEN and confidence-plus-match rows is reported across three risk-head seeds. The audit records a paired image-bootstrap 95% interval of +0.0065 to +0.0187 for the RAVEN versus late-average comparison. This is an image-level interval, not a scene/clip-clustered interval, and it does not account for all training uncertainty.
+The standard deviation for the RAVEN and confidence-plus-match rows is reported across three risk-head seeds, but the matching per-seed exports were not found in the checked-in clean-run folder. The audit records a paired image-bootstrap 95% interval of +0.0065 to +0.0187 for the RAVEN versus late-average comparison. This is an image-level interval, not a scene/clip-clustered interval, and it does not account for all training uncertainty.
 
 Interpret these results conservatively: WBF is higher on the clean benchmark; confidence-plus-match is slightly higher than the full model; these results do not establish that the learned head improves over a simple confidence rule. WBF also fuses and can move boxes, while arbitration methods select from a shared candidate/action set, so this is not a perfectly like-for-like operation.
 
