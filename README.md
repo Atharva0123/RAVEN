@@ -4,7 +4,7 @@
 
 RAVEN is a research prototype that studies whether a lightweight post-detection risk head can help select among detections from visible-light and thermal sensors. The research workflow uses paired images from the **LLVIP dataset** and frozen YOLOv8n detectors for the two modalities.
 
-> **Research status:** exploratory prototype; LLVIP only. The saved archive does not yet fully reproduce all results described in the project summary. RAVEN is not safety-validated, its risk scores are not calibrated probabilities, and generalization to other datasets or real-world sensor failures has not been established.
+> **Research status:** exploratory prototype; LLVIP only. A compact `v8n_v8n` results archive now includes the benchmark and simulated-degradation tables, run summary, and pairing metadata. It omits the LLVIP data, detector weights, checkpoints, and some large secondary outputs. RAVEN is not safety-validated, its risk scores are not calibrated probabilities, and generalization to other datasets or real-world sensor failures has not been established.
 
 ## At a glance
 
@@ -28,7 +28,7 @@ This is a post-detection arbitration study, not a new object detector. See the a
 
 ## Research results and evidence status
 
-The current project summary reports the following clean-test results:
+The archived `v8n_v8n` run reports the following clean-test results (custom all-point AP@50):
 
 | Method | Reported AP@50 / mAP@50 |
 |---|---:|
@@ -37,13 +37,13 @@ The current project summary reports the following clean-test results:
 | Confidence-plus-match ablation | 0.7088 ± 0.0019 |
 | Weighted-box fusion (WBF) | 0.7210 |
 
-**These figures are not yet fully traceable to the checked-in output archive.** The committed `output/RAVEN_LLVIP_2026-10-15/run_summary.json` is an older seed-42 run that records RAVEN AP50 0.7056, and its `table8_benchmark.csv` does not include the confidence-plus-match or WBF rows. The three-seed figures and WBF comparison should therefore be treated as reported project results, not independently verified archived results, until the matching notebook run and complete exports are saved.
+**The supporting results are now archived** in [`output/RAVEN_LLVIP_2026-10-15_v8n_v8n/`](output/RAVEN_LLVIP_2026-10-15_v8n_v8n/): the aggregate table contains the clean WBF row and three-seed RAVEN results, while the per-run and bootstrap files expose their supporting records. The older [`output/RAVEN_LLVIP_2026-10-15/`](output/RAVEN_LLVIP_2026-10-15/) folder is a separate seed-42 run (RAVEN AP50 0.7056); do not combine its values with the `v8n_v8n` archive.
 
 Interpretation should remain conservative:
 
 - WBF has the highest reported clean-test score in the project summary.
 - The confidence-plus-match ablation is marginally above the full model, so the results do not establish that the learned geometry/risk features improve the score.
-- The reported paired image-bootstrap interval for RAVEN versus late-average fusion is +0.0065 to +0.0187; image-level resampling does not account for scene clustering or all training uncertainty.
+- The archived paired image-bootstrap interval for RAVEN versus late-average fusion is +0.0065 to +0.0183 (`degradation_bootstrap.csv`); image-level resampling does not account for scene clustering or all training uncertainty.
 - Sensor-degradation tests use synthetic perturbations. They are not evidence of robustness to physical sensor failure, weather, glare, or deployment conditions.
 - Coverage remained near 100% in the reported experiments, so meaningful selective risk reduction via abstention has not been demonstrated.
 
@@ -114,7 +114,7 @@ Never commit `.env` or real credentials. PostgreSQL, Redis, and MinIO are option
 - **Synthetic degradation:** perturbations do not replicate the full range of real sensor failures or environmental conditions.
 - **Risk and abstention:** risk outputs are not established as calibrated probabilities, and the reported coverage does not show useful abstention.
 - **Baseline comparison:** WBF's reported clean score exceeds RAVEN's, and the confidence-plus-match ablation is marginally higher than the full model.
-- **Archive completeness:** some outputs described in the project summary are missing or inconsistent with the currently checked-in run files. Resolve these discrepancies before final paper submission.
+- **Archive scope:** the compact `v8n_v8n` archive includes the key tables and run metadata but excludes checkpoints, serialized per-image records, image-level error dumps, and training logs. Rerun the notebook if those artifacts or fresh reproduction are needed.
 
 ## Repository structure
 
@@ -133,8 +133,13 @@ RAVEN/
 │   └── figures/
 │       └── raven_architecture.md
 ├── data/models/                 # Small local application checkpoint
-└── output/RAVEN_LLVIP_2026-10-15/
-    └── run_summary.json         # Older seed-42 run; see archive caveat above
+├── output/RAVEN_LLVIP_2026-10-15/
+│   └── run_summary.json         # Separate older seed-42 run
+└── output/RAVEN_LLVIP_2026-10-15_v8n_v8n/
+    ├── run_summary.json
+    ├── pairing_summary.json
+    ├── table8_benchmark.csv
+    └── degradation tables and plot
 ```
 
 ## Contributors
@@ -156,3 +161,10 @@ Software citation metadata is provided in [`CITATION.cff`](CITATION.cff). Please
 The RAVEN source code and documentation authored for this repository are released under the [MIT License](LICENSE). It permits use, modification, and redistribution provided the copyright and license notice are retained. It is a permissive license and does not require derivative projects to publish their source code. See the full license text for the terms.
 
 The MIT license applies only to material the project has the right to license. It does **not** automatically cover the LLVIP dataset, third-party packages, pretrained model weights, or other assets with separate terms; obtain and follow their respective licenses. Before redistributing contributions from other authors, the maintainers should ensure they have permission or the necessary rights to license those contributions.
+
+
+## Clean LLVIP results figure
+
+![Clean LLVIP comparison using custom all-point AP@50](docs/figures/llvip_clean_ap50.svg)
+
+The plotted clean values are supported by the archived `degradation_summary.csv`, including WBF at 0.7210. The chart summarizes this one LLVIP evaluation; it does not establish independent-dataset or real-world robustness. See [the reproducibility guide](docs/REPRODUCIBILITY.md).

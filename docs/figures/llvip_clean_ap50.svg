@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520" role="img" aria-labelledby="title desc">
+  <title id="title">RAVEN clean LLVIP custom AP at 50 comparison</title>
+  <desc id="desc">Saved result bundle values: late-average fusion 0.6961, full-feature RAVEN mean across three seeds 0.7083, confidence-plus-match ablation mean 0.7088. WBF 0.7210 is only reported in the README; supporting result data is absent from the checked-in bundle.</desc>
+  <rect width="1000" height="520" rx="18" fill="#ffffff"/>
+  <text x="500" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#172b4d">Clean LLVIP comparison · custom all-point AP@50</text>
+  <text x="500" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#52647a">Higher is better · one benchmark dataset · historical saved results, not rerun here</text>
+  <g font-family="Arial,sans-serif" font-size="14" fill="#344563">
+    <text x="35" y="145">Late-average fusion</text><text x="35" y="230">RAVEN full features</text><text x="35" y="315">Confidence + match ablation</text><text x="35" y="400">Weighted-box fusion (WBF)</text>
+  </g>
+  <g>
+    <rect x="280" y="118" width="443" height="42" rx="7" fill="#6b8299"/><rect x="280" y="203" width="500" height="42" rx="7" fill="#4c86c6"/><rect x="280" y="288" width="502" height="42" rx="7" fill="#7b68b2"/><rect x="280" y="373" width="558" height="42" rx="7" fill="#d18a3b" stroke-dasharray="5 4" stroke="#8a561e"/>
+    <text x="733" y="145" font-family="Arial,sans-serif" font-size="15" fill="#172b4d">0.6961</text><text x="790" y="230" font-family="Arial,sans-serif" font-size="15" fill="#172b4d">0.7083 ± 0.0029</text><text x="792" y="315" font-family="Arial,sans-serif" font-size="15" fill="#172b4d">0.7088 ± 0.0019</text><text x="848" y="400" font-family="Arial,sans-serif" font-size="15" fill="#172b4d">0.7210*</text>
+  </g>
+  <line x1="280" y1="447" x2="880" y2="447" stroke="#8796a5"/><text x="280" y="472" font-family="Arial,sans-serif" font-size="12" fill="#52647a">0.60</text><text x="850" y="472" font-family="Arial,sans-serif" font-size="12" fill="#52647a">0.73</text>
+  <text x="45" y="495" font-family="Arial,sans-serif" font-size="12" fill="#7a4b13">* WBF is README-reported; its supporting row/output is absent from the checked-in result archive.</text>
+</svg>
